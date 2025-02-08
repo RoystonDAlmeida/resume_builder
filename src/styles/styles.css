@@ -1,0 +1,191 @@
+html, body, #app {
+    height: 100%;
+    margin: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column; /* Stack header and sections vertically */
+}
+
+.v-app-bar.header {
+    border-bottom: 4px solid #e91e63;
+    box-shadow: 0 4px 10px rgba(233, 30, 99, 0.5);
+    height: 64px;
+}
+
+.v-toolbar-title.title {
+    font-family: 'Times New Roman', Times, serif;
+    color: white;
+    font-weight: bold;
+}
+
+.icon {
+    margin-right: 8px;
+    margin-bottom: 5px;
+}
+
+.sections {
+    background-color: #1c1c1c; 
+    color: white; 
+    padding: 20px; 
+    overflow-y: auto;
+    flex: 1;    /* Take up remaining available space */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center;    /* Center horizontally */
+    align-items: flex-start;
+}
+
+.resume-title-container {
+    border: 2px solid white;
+    padding: 20px;
+    text-align: center;
+    width: fit-content; /* Adjust width to content */
+    height: auto;   /* Adjust height based on content */
+    margin-left: 20%; 
+    margin-right: 20%;
+    border-radius: 25px; 
+}
+  
+.resume-title {
+    font-family:'Times New Roman', Times, serif;
+    font-size: 1.5em; /* Adjust size as needed */
+    color: #e91e63; /* Pink-purplish color */
+    overflow: hidden; /* Ensures the text is in one line */
+    white-space: nowrap; /* Keep text on one line */
+    margin: 0 auto;
+    letter-spacing: .15em; /* Adjust letter spacing */
+    animation:
+      typing 3.5s steps(40, end),
+      blink-caret .75s step-end infinite;
+}
+  
+.sections-container {
+    border: 2px solid #e91e63; 
+    padding: 20px;
+    text-align: center;
+    width: 60%;
+    height: auto;   
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 20px;
+    border-radius: 25px;
+    position: relative;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+  
+.section-title {
+    text-align: left;
+    margin: 0; 
+    font-size: 1.5em; 
+    color: white; 
+    flex-grow: 1;
+}
+  
+.arrow-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .section-number-bubble {
+    background-color: #e91e63;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    margin: 0 5px; /* Add some horizontal spacing */
+  }
+  
+  
+.objective-box {
+    border: 1px dashed #ccc; 
+    padding: 20px;
+    margin: 0 10%; 
+    text-align: left;
+    border-radius: 10px;
+    outline: none;
+    box-sizing: border-box;
+}
+  
+.objective-placeholder {
+    color: #aaa; /* Placeholder text color */
+    font-style: italic;
+    position: absolute; /* So it doesn't affect layout */
+    pointer-events: none; /* Allow clicks to pass through */
+}
+
+.next-button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    align-self: flex-end;   /* Align to the right */
+    transition: background-color 0.3s ease; /* Hover transition */
+}
+  
+.next-button:hover {
+    background-color: #c81552; /* Darker shade on hover */
+}
+
+.nav-arrow {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+  
+.nav-arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* The typing effect */
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+/* Media Queries - To adjust for smaller screens */
+@media (max-width: 768px) { 
+    .sections {
+        padding: 10px; 
+        margin-top: 50px; 
+    }
+
+    .resume-title-container {
+        margin-left: 10%; 
+        margin-right: 10%; 
+        margin-top: 5%;
+        padding: 15px; 
+    }
+
+    .resume-title {
+        font-size: 1.2em; 
+    }
+}
+
+@media (max-width: 576px) { 
+    .resume-title {
+        font-size: 1em; 
+    }
+
+    .resume-title-container {
+        padding: 10px; 
+    }
+}
