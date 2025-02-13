@@ -1,0 +1,12 @@
+# Flask framework for backend
+Flask
+
+# CORS module for origin access
+flask-cors
+
+# Dotenv module for accessing environment variables
+python-dotenv
+
+# Langchain modules to interact with the model
+langchain_groq
+langchain_core
