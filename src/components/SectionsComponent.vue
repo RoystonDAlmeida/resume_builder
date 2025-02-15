@@ -29,11 +29,14 @@
           contenteditable="true"
           @focus="removePlaceholder"
           @blur="handleBlur"
+          @input="handleInput"
         >
           <span v-if="showPlaceholder" class="objective-placeholder">
             Highlight your career aspirations and how your skills align with the role.
           </span>
           <span v-else ref="objectiveBox">{{ objectiveText }}</span>
+          <!-- Display predicted word if available -->
+          <span v-if="predictedWord" class="predicted-word">{{ predictedWord }}</span>
         </div>
         <button class="next-button" @click="saveAndNext">Next</button>
         <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
@@ -43,6 +46,8 @@
   
 <script>
 import { ref, inject, onMounted, onBeforeUnmount } from 'vue';
+import axios from 'axios';
+import { debounce } from 'lodash';
 
   export default {
     name: 'SectionsComponent',
@@ -58,10 +63,58 @@ import { ref, inject, onMounted, onBeforeUnmount } from 'vue';
       const sectionsLength = inject('sectionsLength'); // inject sectionsLength
       const errorMessage = ref('');
       const objectiveBox = ref(null); // Ref for contenteditable element
+      const predictedWord = ref('');
+      const API_URL = 'http://localhost:5000/predict';
 
-      const removePlaceholder = () => {
-        showPlaceholder.value = false;
-      };
+      const predictNextWord = async (text) => {
+      try {
+        
+        const response = await axios.post(API_URL, { text: text });
+
+        // console.log('API Response:', response); // Debugging
+
+        if (response.data.predictions && response.data.predictions.length > 0) {
+          predictedWord.value = response.data.predictions[0];
+        } else {
+          predictedWord.value = '';
+        }
+      } catch (error) {
+        console.error('Error fetching predictions:', error);
+        errorMessage.value = 'Failed to get word predictions.';
+        predictedWord.value = '';
+      }
+    };
+
+    const debouncedPredict = debounce((text) => {
+      predictNextWord(text);
+    }, 300);
+
+    const handleInput = (event) => {
+      objectiveText.value = event.target.innerText; // Set the objectiveText to what is being typed
+
+      if (event.target.innerHTML.includes('&nbsp;')) {
+        // If a space is detected, it will be present in innerHTML
+        debouncedPredict(objectiveText.value);
+      } else {
+        predictedWord.value = ''; // Clear prediction if not a space
+      }
+
+      // Handle empty content case
+      if (!objectiveText.value) {
+        showPlaceholder.value = true; // Show placeholder if empty
+      }
+    };
+
+    const insertPredictedWord = () => {
+      if (predictedWord.value) {
+        objectiveText.value += `${predictedWord.value} `; // Append predicted word
+        predictedWord.value = ''; // Clear prediction after insertion
+      }
+    };
+
+    const removePlaceholder = () => {
+      showPlaceholder.value = false;
+    };
 
     const restorePlaceholder = () => {
       if (!objectiveText.value) {
@@ -88,7 +141,7 @@ import { ref, inject, onMounted, onBeforeUnmount } from 'vue';
       }
 
       errorMessage.value = ''; // Clear any previous error
-      resumeData.objective = objectiveText.value; // Store in resumeData
+      resumeData.value.objective = objectiveText.value; // Store in resumeData
       console.log('Resume Data:', resumeData.value);
       nextSection();
     };
@@ -107,6 +160,9 @@ import { ref, inject, onMounted, onBeforeUnmount } from 'vue';
       sectionsLength,
       errorMessage,
       objectiveBox,
+      predictedWord,
+      handleInput,
+      insertPredictedWord,
     };
     },
   };
