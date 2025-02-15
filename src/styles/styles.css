@@ -189,3 +189,13 @@ html, body, #app {
         padding: 10px; 
     }
 }
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.predicted-word {
+    font-style: italic;
+    color: lightgray; /* Adjust color as needed */
+}
