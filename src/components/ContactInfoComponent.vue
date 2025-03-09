@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { inject, ref } from 'vue';
+import { inject, ref, onMounted } from 'vue';
 
 export default {
   name: 'ContactInfoComponent',
@@ -72,6 +72,11 @@ export default {
     const previousSection = inject('previousSection');
     const currentSection = inject('currentSection');
     const sectionsLength = inject('sectionsLength');
+    const updateTitle = inject('updateTitle'); 
+
+    onMounted(() => {
+      updateTitle('Resume Builder | Contact Info');
+    });
 
     // Error messages for validation
     const fullNameError = ref('');
