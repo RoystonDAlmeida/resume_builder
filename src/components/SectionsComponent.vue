@@ -65,6 +65,7 @@ import { debounce } from 'lodash';
       const objectiveBox = ref(null); // Ref for contenteditable element
       const predictedWord = ref('');
       const API_URL = 'http://localhost:5000/predict';
+      const updateTitle = inject('updateTitle'); 
 
       const predictNextWord = async (text) => {
       try {
@@ -127,6 +128,7 @@ import { debounce } from 'lodash';
     };
 
     onMounted(() => {
+      updateTitle('Resume Builder | Home');
       objectiveText.value = resumeData.value.objective || '';
     });
 
