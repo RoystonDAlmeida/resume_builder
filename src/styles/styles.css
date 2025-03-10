@@ -200,8 +200,8 @@ html, body, #app {
     color: lightgray; /* Adjust color as needed */
 }
 
-/* Styles for ContactInfoComponent */
-.work-experience-container {
+/* Styles for WorkExperienceComponent and EducationComponent*/
+.work-experience-container, .education-container {
     border: 2px solid #e91e63; 
     padding: 20px;
     text-align: center;
@@ -228,7 +228,6 @@ html, body, #app {
     margin-right: 0; /* No margin for the last field */
 }
 
-/* Styles for WorkExperienceComponent */
 .italic-gray {
     font-style: italic;
     color: gray;
@@ -240,7 +239,7 @@ html, body, #app {
     padding: 10px;
   }
   
-  .experience-section {
+  .experience-section, .education-section {
     margin-bottom: 20px;
     padding: 15px;
     border: 2px solid pink;
@@ -249,7 +248,7 @@ html, body, #app {
     position: relative;
   }
   
-  .experience-header {
+  .experience-header, .education-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
