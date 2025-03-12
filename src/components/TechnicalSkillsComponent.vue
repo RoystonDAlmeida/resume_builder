@@ -59,7 +59,7 @@
         <button
           v-if="technicalSkillsSection.length < 5"
           class="add-button pink-button"
-          @click="addtechnicalSkills"
+          @click="addTechnicalSkills"
         >
           + Add Category
         </button>
