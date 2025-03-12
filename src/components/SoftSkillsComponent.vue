@@ -36,11 +36,10 @@
                 ></v-text-field>
             </div>
   
-          </div>
+            <!-- Next Button -->
+            <button class="next-button" @click="saveAndNext">Next</button>
         </div>
-  
-        <!-- Next Button -->
-        <button class="next-button" @click="saveAndNext">Next</button>
+        </div>
       </div>
 </template>
 
@@ -48,7 +47,7 @@
 import { ref, inject, onMounted } from 'vue';
 
 export default {
-  name: 'TechnicalSkillsComponent',
+  name: 'SoftSkillsComponent',
   setup() {
     const resumeData = inject('resumeData');
     const sectionData = inject('sectionData');
@@ -59,88 +58,37 @@ export default {
     const updateTitle = inject('updateTitle');
 
     onMounted(() => {
-      updateTitle('Resume Builder | Technical Skills');
+      updateTitle('Resume Builder | Soft Skills');
     });
 
-    // Define technical skills data
-    const technicalSkillsSection = ref(resumeData.value.technicalSkills || [
-      {
-        category: '',
-        subcategory: '',
-      },
-    ]);
-
-    // Error messages for validation
-    const categoryError = ref(['']);
-    const subcategoryError = ref(['']);
+    // Define soft skills data
+    const softSkillsModel = ref(resumeData.value.softSkills || '');
+    const softSkillsError = ref('');
 
     // Validation rules
     const required = (value) => !!value || 'This field is required';
 
-    const addTechnicalSkills = () => {
-      if (technicalSkillsSection.value.length < 5) {
-        technicalSkillsSection.value.push({
-          category: '',
-          subcategory: '',
-        });
-
-        // Initialize error arrays for the new skill
-        categoryError.value.push('');
-        subcategoryError.value.push('');
-      }
-    };
-
-    const removeCategory = (index) => {
-      if (technicalSkillsSection.value.length > 1) {
-        technicalSkillsSection.value.splice(index, 1);
-        categoryError.value.splice(index, 1);
-        subcategoryError.value.splice(index, 1);
-      }
-    };
-
-    const validateCategory = (index) => {
-      if (!technicalSkillsSection.value[index].category) {
-        categoryError.value[index] = 'Category is required';
+    const validatesoftSkills = () => {
+      if (!softSkillsModel.value) {
+        softSkillsError.value = 'Soft skills are required';
       } else {
-        categoryError.value[index] = '';
-      }
-    };
-
-    const validateSubcategory = (index) => {
-      if (!technicalSkillsSection.value[index].subcategory) {
-        subcategoryError.value[index] = 'Subcategory is required';
-      } else {
-        subcategoryError.value[index] = '';
+        softSkillsError.value = '';
       }
     };
 
     const validateFields = () => {
-      let isValid = true;
-
-      // Reset error messages
-      categoryError.value = technicalSkillsSection.value.map(() => '');
-      subcategoryError.value = technicalSkillsSection.value.map(() => '');
-
-      technicalSkillsSection.value.forEach((skill, index) => {
-        validateCategory(index);
-        validateSubcategory(index);
-
-        if (categoryError.value[index] || subcategoryError.value[index]) {
-          isValid = false;
-        }
-      });
-
-      return isValid;
+      validatesoftSkills();
+      return !softSkillsError.value;
     };
 
     const saveAndNext = () => {
       if (validateFields()) {
-        // Save technical skills data to resumeData in local storage
-        let resumeData = JSON.parse(localStorage.getItem('resumeData')) || {};
+        // Save soft skills data to resumeData in local storage
+        let resumeDataLocal = JSON.parse(localStorage.getItem('resumeData')) || {};
 
-        resumeData.technicalSkills = technicalSkillsSection.value;
+        resumeDataLocal.softSkills = softSkillsModel.value;
 
-        localStorage.setItem('resumeData', JSON.stringify(resumeData));
+        localStorage.setItem('resumeData', JSON.stringify(resumeDataLocal));
 
         nextSection();
       }
@@ -153,14 +101,10 @@ export default {
       previousSection,
       currentSection,
       sectionsLength,
-      technicalSkillsSection,
-      categoryError,
-      subcategoryError,
-      addTechnicalSkills,
-      removeCategory,
+      softSkillsModel,
+      softSkillsError,
       saveAndNext,
-      validateCategory,
-      validateSubcategory,
+      validatesoftSkills,
       required,
     };
   },
