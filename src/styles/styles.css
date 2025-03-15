@@ -239,7 +239,7 @@ html, body, #app {
     padding: 10px;
   }
   
-  .experience-section, .education-section, .technical-skills-section {
+  .experience-section, .education-section, .technical-skills-section, .languages-section {
     margin-bottom: 20px;
     padding: 15px;
     border: 2px solid pink;
@@ -248,7 +248,7 @@ html, body, #app {
     position: relative;
   }
   
-  .experience-header, .education-header, .category-header {
+  .experience-header, .education-header, .category-header, .language-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
