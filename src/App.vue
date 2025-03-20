@@ -1,52 +1,72 @@
 <template>
-  <div id="app">
-    <ResumeEditor :resume="resume" @update-resume="updateResume" />
-    <div ref="resumePreview">
-      <ResumePreview :resume="resume" />
-    </div>
-    <button @click="exportPDF">Export as PDF</button>
-  </div>
+  <v-app>
+    <HeaderComponent />
+    <router-view v-if="$route.name" />
+    <component v-else :is="currentSectionComponent" />
+  </v-app>
 </template>
 
 <script>
-import ResumeEditor from './components/ResumeEditor.vue';
-import ResumePreview from './components/ResumePreview.vue';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import {  provide, computed, defineAsyncComponent } from 'vue';
+import './styles/styles.css';
+import HeaderComponent from './components/HeaderComponent.vue';
+import { useLocalStorage } from './composables/useLocalStorage';
+import { useSections } from './composables/useSections';
+import { useTitle } from './composables/useTitle';
+
+const componentNames = [
+  'ObjectiveComponent',
+  'ContactInfoComponent',
+  'WorkExperienceComponent',
+  'EducationComponent',
+  'TechnicalSkillsComponent',
+  'SoftSkillsComponent',
+  'LanguagesComponent'
+];
 
 export default {
-  components: { ResumeEditor, ResumePreview },
-  
-  data() {
-    return {
-      resume: {
-        name: '',
-        email: '',
-        experience: ''
-      }
-    };
+  components: {
+    HeaderComponent,
+    ...Object.fromEntries(
+      componentNames.map(name => [
+        name,
+        defineAsyncComponent(() => import(`./components/${name}.vue`))
+      ])
+    )
   },
 
-  methods: {
-    updateResume(updatedResume) {
-      this.resume = updatedResume;
-    },
+  setup() {
+    const { updateTitle } = useTitle();
+    provide('updateTitle', updateTitle);
 
-    exportPDF() {
-      const element = this.$refs.resumePreview; // Use ref to get the element
-      html2canvas(element).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        pdf.addImage(imgData, 'PNG', 0, 0);
-        pdf.save('resume.pdf');
-      }).catch(error => {
-        console.error("Error generating PDF:", error);
-      });
-    }
-  }
-}
+    const { resumeData } = useLocalStorage('resumeData', {
+      objective: '',
+      fullName: '',
+      phoneNumber: '',
+      email: '',
+      linkedin: '',
+    }, 12 * 60 * 60 * 1000); // 12 hours expiration
+
+    const {
+      sections,
+      currentSection,
+      currentSectionComponent,
+      sectionData,
+      nextSection,
+      previousSection,
+    } = useSections();
+
+    provide('resumeData', resumeData);
+    provide('sectionData', sectionData);
+    provide('nextSection', nextSection);
+    provide('previousSection', previousSection);
+    provide('currentSection', currentSection);
+    provide('sectionsLength', computed(() => sections.value.length));
+
+    return {
+      resumeData,
+      currentSectionComponent,
+    };
+  },
+};
 </script>
-
-<style scoped>
-/* Add your styles here */
-</style>
