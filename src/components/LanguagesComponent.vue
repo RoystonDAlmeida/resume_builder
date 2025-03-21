@@ -1,6 +1,6 @@
 <template>
     <div class="sections">
-      <div class="technical-skills-container">
+      <div class="languages-container">
         <div class="section-header">
           <h2 class="section-title">{{ sectionData.title }}</h2>
           <p class="italic-gray">*Add Languages</p>
@@ -28,7 +28,7 @@
           <div v-for="(language, index) in languagesSection" :key="index" class="languages-section">
             <div class="language-header">
               <h4>Language #{{ index + 1 }}</h4>
-              <button v-if="index === 1" class="remove-button" @click="removeLanguage(index)">
+              <button v-if="index > 0" class="remove-button" @click="removeLanguage(index)">
                 -
               </button>
             </div>
@@ -72,14 +72,59 @@
         </button>
   
         <!-- Next Button -->
-        <button class="next-button" @click="saveAndNext">Next</button>
+        <button class="next-button" @click="saveAndNext">Submit</button>
       </div>
+
+      <!-- Generate PDF Button -->
+      <button class="generate-pdf-button" @click="handleShowPdfPreview">
+        <v-icon class="download-icon" color="white">mdi-download</v-icon>
+        Generate PDF
+      </button>
+
+      <!-- PDF Preview Dialog -->
+      <v-dialog v-model="pdfPreviewVisible" width="900">
+        <v-card>
+          <v-card-title class="pdf-preview-header">
+            <v-spacer></v-spacer>
+
+            <div class="pdf-buttons">
+              <v-btn icon @click="handleDownloadPdf" class="pdf-download-button">
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
+              <v-btn icon @click="closePdfPreview">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </div>
+
+          </v-card-title>
+          <v-card-text class="pdf-preview-content">
+            <iframe
+              ref="pdfPreview"
+              width="100%"
+              height="600px"
+              :src="pdfPreviewUrl"
+            ></iframe>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
     </div>
   </template>
   
   <script>
-  import { ref, inject, onMounted } from 'vue';
+  import { ref, inject, onMounted, nextTick } from 'vue';
+  import { generatePdf, showPdfPreview, downloadPdf } from '@/utils/pdfPreview';
   
+  // Constants
+  const PROFICIENCY_OPTIONS = [
+        { value: '0', title: '0 - Beginner' },
+        { value: '1', title: '1 - Classroom Study' },
+        { value: '2', title: '2 - Proficient' },
+        { value: '3', title: '3 - Intermediate' },
+        { value: '4', title: '4 - Fluent' },
+        { value: '5', title: '5 - Advanced' },
+  ];
+
   export default {
     name: 'LanguagesComponent',
     setup() {
@@ -90,13 +135,9 @@
       const currentSection = inject('currentSection');
       const sectionsLength = inject('sectionsLength');
       const updateTitle = inject('updateTitle');
-  
-      onMounted(() => {
-        updateTitle('Resume Builder | Languages');
-      });
-  
+
       // Define languages data
-      const languagesSection = ref(resumeData.value.languages || [
+      const languagesSection = ref( [
         {
           language: '',
           proficiency: '',
@@ -107,19 +148,38 @@
       const languageError = ref(['']);
       const proficiencyError = ref(['']);
   
+      onMounted(() => {
+        updateTitle('Resume Builder | Languages');
+
+        // Load languages data from localStorage
+        const storedResumeData =
+          JSON.parse(localStorage.getItem('resumeData')) || {};
+        if (storedResumeData.languages) {
+          languagesSection.value = storedResumeData.languages;
+        }
+
+        nextTick(() => {
+          // Initialize error arrays for the loaded languages
+          languageError.value = languagesSection.value.map(() => '');
+          proficiencyError.value = languagesSection.value.map(() => '');
+        });
+      });
+
       // Proficiency options
-      const proficiencyOptions = [
-        { value: '0', title: '0 - Beginner' },
-        { value: '1', title: '1 - Classroom Study' },
-        { value: '2', title: '2 - Proficient' },
-        { value: '3', title: '3 - Intermediate' },
-        { value: '4', title: '4 - Fluent' },
-        { value: '5', title: '5 - Advanced' },
-     ];
-     console.log(proficiencyOptions);
+      const proficiencyOptions = PROFICIENCY_OPTIONS;
+
       // Validation rules
       const required = (value) => !!value || 'This field is required';
   
+      // Centralized validation function
+      const validateField = (value, errorArray, index, fieldName) => {
+        if (!value) {
+            errorArray.value[index] = `${fieldName} is required`;
+        } else {
+            errorArray.value[index] = '';
+        }
+      };
+
       const addLanguages = () => {
         if (languagesSection.value.length < 5) {
           languagesSection.value.push({
@@ -142,19 +202,11 @@
       };
   
       const validateLanguage = (index) => {
-        if (!languagesSection.value[index].language) {
-          languageError.value[index] = 'Language is required';
-        } else {
-          languageError.value[index] = '';
-        }
+            validateField(languagesSection.value[index].language, languageError, index, 'Language');
       };
-  
+
       const validateProficiency = (index) => {
-        if (!languagesSection.value[index].proficiency) {
-          proficiencyError.value[index] = 'Proficiency is required';
-        } else {
-          proficiencyError.value[index] = '';
-        }
+            validateField(languagesSection.value[index].proficiency, proficiencyError, index, 'Proficiency');
       };
   
       const validateFields = () => {
@@ -181,17 +233,36 @@
   
       const saveAndNext = () => {
         if (validateFields()) {
-          // Save technical skills data to resumeData in local storage
-          let resumeData = JSON.parse(localStorage.getItem('resumeData')) || {};
-  
-          resumeData.langauges = languagesSection.value;
-  
-          localStorage.setItem('resumeData', JSON.stringify(resumeData));
-  
-          nextSection();
+            // Save technical skills data to resumeData in local storage
+            let currentResumeData = JSON.parse(localStorage.getItem('resumeData')) || {};
+
+            currentResumeData.languages = languagesSection.value;
+
+            localStorage.setItem('resumeData', JSON.stringify(currentResumeData));
+
         }
       };
   
+      // PDF preview and download
+      const pdfPreviewVisible = ref(false);
+      const pdfPreviewUrl = ref('');
+      let pdfBlob = null;
+
+      const handleShowPdfPreview = () => {
+          const resumeDataValue = JSON.parse(localStorage.getItem('resumeData'));
+          pdfBlob = generatePdf(resumeDataValue);
+          showPdfPreview(pdfBlob, pdfPreviewUrl, pdfPreviewVisible);
+      };
+
+      const handleDownloadPdf = () => {
+          downloadPdf(pdfBlob, closePdfPreview);
+      };
+
+      const closePdfPreview = () => {
+        pdfPreviewVisible.value = false;
+        pdfPreviewUrl.value = '';
+      };
+
       return {
         resumeData,
         sectionData,
@@ -209,6 +280,11 @@
         validateLanguage,
         validateProficiency,
         required,
+        handleShowPdfPreview,
+        pdfPreviewVisible,
+        pdfPreviewUrl,
+        handleDownloadPdf,
+        closePdfPreview,
       };
     },
   };
