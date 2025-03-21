@@ -1,50 +1,51 @@
 <template>
-    <div class="sections">
-      <div class="technical-skills-container">
-        <div class="section-header">
-          <h2 class="section-title">{{ sectionData.title }}</h2>
-          <p class="italic-gray">*Add Technical Skills</p>
-          <div class="arrow-container">
-            <button
-              class="nav-arrow"
-              @click="previousSection"
-              :disabled="currentSection === 0"
-            >
-              &lt;
-            </button>
-            <div class="section-number-bubble">{{ sectionData.number }}</div>
-            <button
-              class="nav-arrow"
-              @click="nextSection"
-              :disabled="currentSection >= sectionsLength - 1"
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
-  
-        <!-- Soft Skills Section (Scrollable Container) -->
-        <div class="scrollable-container">
-
-            <!-- Input field for soft skills -->
-            <div class="input-row">
-                <v-text-field
-                    v-model="softSkillsModel"
-                    label="Enter your soft skills(Interpersonal communication, Teamwork etc)"
-                    :error-messages="softSkillsError"
-                    @input="validatesoftSkills"
-                ></v-text-field>
-            </div>
-  
-            <!-- Next Button -->
-            <button class="next-button" @click="saveAndNext">Next</button>
-        </div>
+  <div class="sections">
+    <div class="technical-skills-container">
+      <div class="section-header">
+        <h2 class="section-title">{{ sectionData.title }}</h2>
+        <p class="italic-gray">*Add Soft Skills</p>
+        <div class="arrow-container">
+          <button
+            class="nav-arrow"
+            @click="previousSection"
+            :disabled="currentSection === 0"
+          >
+            &lt;
+          </button>
+          <div class="section-number-bubble">{{ sectionData.number }}</div>
+          <button
+            class="nav-arrow"
+            @click="saveAndNext"
+            :disabled="currentSection >= sectionsLength - 1"
+          >
+            &gt;
+          </button>
         </div>
       </div>
+
+      <!-- Soft Skills Section (Scrollable Container) -->
+      <div class="scrollable-container">
+        <!-- Input field for soft skills -->
+        <div class="input-row">
+          <v-text-field
+            v-model="softSkillsModel"
+            label="Enter your soft skills (Interpersonal communication, Teamwork etc)"
+            :error-messages="softSkillsError"
+            @blur="validateSoftSkills"
+            @input="clearSoftSkillsError"
+          ></v-text-field>
+        </div>
+
+        <!-- Next Button -->
+        <button class="next-button" @click="saveAndNext">Next</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { ref, inject, onMounted } from 'vue';
+import { useDataPersistence } from '../composables/useDataPersistence';
 
 export default {
   name: 'SoftSkillsComponent',
@@ -57,42 +58,40 @@ export default {
     const sectionsLength = inject('sectionsLength');
     const updateTitle = inject('updateTitle');
 
-    onMounted(() => {
-      updateTitle('Resume Builder | Soft Skills');
-    });
-
     // Define soft skills data
-    const softSkillsModel = ref(resumeData.value.softSkills || '');
+    const softSkillsModel = ref('');
     const softSkillsError = ref('');
 
-    // Validation rules
-    const required = (value) => !!value || 'This field is required';
+    onMounted(() => {
+      updateTitle('Resume Builder | Soft Skills');
+      const storedResumeData = JSON.parse(localStorage.getItem('resumeData')) || {};
+      softSkillsModel.value = storedResumeData.softSkills || '';
+    });
 
-    const validatesoftSkills = () => {
-      if (!softSkillsModel.value) {
+    const validateSoftSkills = () => {
+      if (!softSkillsModel.value?.trim()) {
         softSkillsError.value = 'Soft skills are required';
-      } else {
-        softSkillsError.value = '';
+        return false;
       }
+      softSkillsError.value = '';
+      return true;
     };
 
-    const validateFields = () => {
-      validatesoftSkills();
-      return !softSkillsError.value;
+    const clearSoftSkillsError = () => {
+      softSkillsError.value = '';
     };
 
     const saveAndNext = () => {
-      if (validateFields()) {
-        // Save soft skills data to resumeData in local storage
-        let resumeDataLocal = JSON.parse(localStorage.getItem('resumeData')) || {};
-
-        resumeDataLocal.softSkills = softSkillsModel.value;
-
+      const isValid = validateSoftSkills();
+      if (isValid) {
+        const resumeDataLocal = JSON.parse(localStorage.getItem('resumeData')) || {};
+        resumeDataLocal.softSkills = softSkillsModel.value.trim();
         localStorage.setItem('resumeData', JSON.stringify(resumeDataLocal));
-
         nextSection();
       }
     };
+
+    useDataPersistence(resumeData, { softSkills: softSkillsModel });
 
     return {
       resumeData,
@@ -104,8 +103,8 @@ export default {
       softSkillsModel,
       softSkillsError,
       saveAndNext,
-      validatesoftSkills,
-      required,
+      validateSoftSkills,
+      clearSoftSkillsError,
     };
   },
 };
