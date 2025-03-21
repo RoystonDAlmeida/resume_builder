@@ -1,77 +1,82 @@
 <template>
-    <div class="sections">
-      <div class="technical-skills-container">
-        <div class="section-header">
-          <h2 class="section-title">{{ sectionData.title }}</h2>
-          <p class="italic-gray">*Add Technical Skills</p>
-          <div class="arrow-container">
-            <button
-              class="nav-arrow"
-              @click="previousSection"
-              :disabled="currentSection === 0"
-            >
-              &lt;
-            </button>
-            <div class="section-number-bubble">{{ sectionData.number }}</div>
-            <button
-              class="nav-arrow"
-              @click="nextSection"
-              :disabled="currentSection >= sectionsLength - 1"
-            >
-              &gt;
-            </button>
-          </div>
+  <div class="sections">
+    <div class="technical-skills-container">
+      <div class="section-header">
+        <h2 class="section-title">{{ sectionData.title }}</h2>
+        <p class="italic-gray">*Add Technical Skills</p>
+        <div class="arrow-container">
+          <button
+            class="nav-arrow"
+            @click="previousSection"
+            :disabled="currentSection === 0"
+          >
+            &lt;
+          </button>
+          <div class="section-number-bubble">{{ sectionData.number }}</div>
+          <button
+            class="nav-arrow"
+            @click="saveAndNext"
+            :disabled="currentSection >= sectionsLength - 1"
+          >
+            &gt;
+          </button>
         </div>
-  
-        <!-- Technical Skills Section (Scrollable Container) -->
-        <div class="scrollable-container">
-          <div v-for="(skill, index) in technicalSkillsSection" :key="index" class="technical-skills-section">
-            <div class="category-header">
-              <h4>Category #{{ index + 1 }}</h4>
-              <button v-if="index === 1" class="remove-button" @click="removeCategory">
-                -
-              </button>
-            </div>
-
-            <!-- Input field for category(eg: Programming Languages) and sub-category(eg: C, C++ etc)-->
-            <div class="input-row">
-                <v-text-field
-                    v-model="skill.category"
-                    label="Category (e.g., Programming Languages, Database Management)"
-                    :error-messages="categoryError[index]"
-                    @input="validateCategory(index)"
-                ></v-text-field>
-            </div>
-
-            <div class="input-row">
-                <v-text-field
-                    v-model="skill.subcategory"
-                    label="Subcategory (e.g., C, C++, Java)"
-                    :error-messages="subcategoryError[index]"
-                    @input="validateSubcategory(index)"
-                ></v-text-field>
-            </div>
-  
-          </div>
-        </div>
-  
-        <!-- Add Category Button -->
-        <button
-          v-if="technicalSkillsSection.length < 5"
-          class="add-button pink-button"
-          @click="addTechnicalSkills"
-        >
-          + Add Category
-        </button>
-  
-        <!-- Next Button -->
-        <button class="next-button" @click="saveAndNext">Next</button>
       </div>
+      <div v-if="technicalSkillsError" class="error-message">
+        At least one technical skill is required.
+      </div>
+      <!-- Technical Skills Section (Scrollable Container) -->
+      <div class="scrollable-container">
+        <div
+          v-for="(skill, index) in technicalSkillsSection"
+          :key="index"
+          class="technical-skills-section"
+        >
+          <div class="category-header">
+            <h4>Category #{{ index + 1 }}</h4>
+            <button v-if="index > 0" class="remove-button" @click="removeCategory(index)">
+              -
+            </button>
+          </div>
+
+          <!-- Input field for category(eg: Programming Languages) and sub-category(eg: C, C++ etc)-->
+          <div class="input-row">
+            <v-text-field
+              v-model="skill.category"
+              label="Category (e.g., Programming Languages, Database Management)"
+              :error-messages="categoryError[index]"
+              @input="validateCategory(index)"
+            ></v-text-field>
+          </div>
+
+          <div class="input-row">
+            <v-text-field
+              v-model="skill.subcategory"
+              label="Subcategory (e.g., C, C++, Java)"
+              :error-messages="subcategoryError[index]"
+              @input="validateSubcategory(index)"
+            ></v-text-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Category Button -->
+      <button
+        v-if="technicalSkillsSection.length < 5"
+        class="add-button pink-button"
+        @click="addTechnicalSkills"
+      >
+        + Add Category
+      </button>
+
+      <!-- Next Button -->
+      <button class="next-button" @click="saveAndNext">Next</button>
     </div>
+  </div>
 </template>
 
 <script>
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, nextTick } from 'vue';
 
 export default {
   name: 'TechnicalSkillsComponent',
@@ -84,10 +89,6 @@ export default {
     const sectionsLength = inject('sectionsLength');
     const updateTitle = inject('updateTitle');
 
-    onMounted(() => {
-      updateTitle('Resume Builder | Technical Skills');
-    });
-
     // Define technical skills data
     const technicalSkillsSection = ref(resumeData.value.technicalSkills || [
       {
@@ -95,6 +96,7 @@ export default {
         subcategory: '',
       },
     ]);
+    const technicalSkillsError = ref(false);
 
     // Error messages for validation
     const categoryError = ref(['']);
@@ -102,6 +104,21 @@ export default {
 
     // Validation rules
     const required = (value) => !!value || 'This field is required';
+
+    onMounted(() => {
+      updateTitle('Resume Builder | Technical Skills');
+      // Load technical skills data from localStorage
+      const storedResumeData =
+        JSON.parse(localStorage.getItem('resumeData')) || {};
+      if (storedResumeData.technicalSkills) {
+        technicalSkillsSection.value = storedResumeData.technicalSkills;
+      }
+      nextTick(() => {
+        // Initialize error arrays for the loaded experiences
+        categoryError.value = technicalSkillsSection.value.map(() => '');
+        subcategoryError.value = technicalSkillsSection.value.map(() => '');
+      });
+    });
 
     const addTechnicalSkills = () => {
       if (technicalSkillsSection.value.length < 5) {
@@ -142,19 +159,25 @@ export default {
 
     const validateFields = () => {
       let isValid = true;
+      technicalSkillsError.value = false;
 
       // Reset error messages
       categoryError.value = technicalSkillsSection.value.map(() => '');
       subcategoryError.value = technicalSkillsSection.value.map(() => '');
 
-      technicalSkillsSection.value.forEach((skill, index) => {
-        validateCategory(index);
-        validateSubcategory(index);
+      if (technicalSkillsSection.value.length === 0) {
+        technicalSkillsError.value = true;
+        isValid = false;
+      } else {
+        technicalSkillsSection.value.forEach((skill, index) => {
+          validateCategory(index);
+          validateSubcategory(index);
 
-        if (categoryError.value[index] || subcategoryError.value[index]) {
-          isValid = false;
-        }
-      });
+          if (categoryError.value[index] || subcategoryError.value[index]) {
+            isValid = false;
+          }
+        });
+      }
 
       return isValid;
     };
@@ -188,7 +211,14 @@ export default {
       validateCategory,
       validateSubcategory,
       required,
+      technicalSkillsError,
     };
   },
 };
 </script>
+<style scoped>
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+}
+</style>
