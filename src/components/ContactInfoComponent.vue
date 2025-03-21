@@ -1,40 +1,17 @@
 <template>
-  <div class="sections">
-    <div class="resume-title-container">
-      <h2 class="resume-title">Craft your winning attractive ATS friendly Resume!</h2>
-    </div>
-    <div class="sections-container">
-      <div class="section-header">
-        <h2 class="section-title">{{ sectionData.title }}</h2>
-        <div class="arrow-container">
-          <button
-            class="nav-arrow"
-            @click="previousSection"
-            :disabled="currentSection === 0"
-          >
-            &lt;
-          </button>
-          <div class="section-number-bubble">{{ sectionData.number }}</div>
-          <button
-            class="nav-arrow"
-            @click="nextSection"
-            :disabled="currentSection >= sectionsLength - 1"
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
-
+  <BaseSection :validateFunction="validateFields">
+    <div class="scrollable-container">
       <!-- Fields Layout -->
       <div class="input-row">
         <v-text-field
-          v-model="resumeData.fullName"
+          v-model="fullName"
           label="Full Name"
           :error-messages="fullNameError"
           @input="validateFullName"
         ></v-text-field>
+
         <v-text-field
-          v-model="resumeData.phoneNumber"
+          v-model="phoneNumber"
           label="Phone Number"
           :error-messages="phoneNumberError"
           @input="validatePhoneNumber"
@@ -42,125 +19,136 @@
       </div>
 
       <v-text-field
-        v-model="resumeData.email"
+        v-model="location"
+        label="Location"
+        :error-messages="locationError"
+        @input="validateLocation"
+      ></v-text-field>
+
+      <v-text-field
+        v-model="email"
         label="Email"
         :error-messages="emailError"
         @input="validateEmail"
       ></v-text-field>
 
       <v-text-field
-        v-model="resumeData.linkedin"
+        v-model="linkedin"
         label="LinkedIn Profile URL"
         :error-messages="linkedinError"
         @input="validateLinkedIn"
       ></v-text-field>
-
-      <button class="next-button" @click="saveAndNext">Next</button>
     </div>
-  </div>
+  </BaseSection>
 </template>
 
 <script>
 import { inject, ref, onMounted } from 'vue';
+import BaseSection from './BaseSection.vue';
+import { useFieldValidation } from '../composables/useFieldValidation';
+import { useDataPersistence } from '../composables/useDataPersistence';
+import { useSectionValidation } from '../composables/useSectionValidation';
 
 export default {
   name: 'ContactInfoComponent',
+  components: {
+    BaseSection,
+  },
   setup() {
     const resumeData = inject('resumeData');
-    const sectionData = inject('sectionData');
-    const nextSection = inject('nextSection');
-    const previousSection = inject('previousSection');
-    const currentSection = inject('currentSection');
-    const sectionsLength = inject('sectionsLength');
-    const updateTitle = inject('updateTitle'); 
+    const updateTitle = inject('updateTitle');
+    const { validate } = useSectionValidation();
 
     onMounted(() => {
       updateTitle('Resume Builder | Contact Info');
     });
 
+    // Initialise empty values for model attributes
+    const fullName = ref('');
+    const phoneNumber = ref('');
+    const location = ref('');
+    const email = ref('');
+    const linkedin = ref('');
+
     // Error messages for validation
     const fullNameError = ref('');
     const phoneNumberError = ref('');
+    const locationError = ref('');
     const emailError = ref('');
     const linkedinError = ref('');
 
-    const validateFullName = () => {
-      if (!resumeData.value.fullName) {
-        fullNameError.value = 'Full Name is required';
-      } else {
-        fullNameError.value = '';
-      }
-    };
+    const { validateField } = useFieldValidation();
 
-    const validatePhoneNumber = () => {
-      const phoneRegex = /^\d{10}$/;
-      if (!resumeData.value.phoneNumber) {
-        phoneNumberError.value = 'Phone Number is required';
-      } else if (!phoneRegex.test(resumeData.value.phoneNumber)) {
-        phoneNumberError.value = 'Invalid Phone Number format';
-      } else {
-        phoneNumberError.value = '';
-      }
-    };
-
-    const validateEmail = () => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!resumeData.value.email) {
-        emailError.value = 'Email is required';
-      } else if (!emailRegex.test(resumeData.value.email)) {
-        emailError.value = 'Invalid Email format';
-      } else {
-        emailError.value = '';
-      }
-    };
-
-    const validateLinkedIn = () => {
-      const linkedinRegex = /^https:\/\/[a-z]{2,3}\.linkedin\.com\/.*$/;
-      if (!resumeData.value.linkedin) {
-        linkedinError.value = 'LinkedIn Profile URL is required';
-      } else if (!linkedinRegex.test(resumeData.value.linkedin)) {
-        linkedinError.value = 'Invalid LinkedIn Profile URL format';
-      } else {
-        linkedinError.value = '';
-      }
-    };
+    const validateFullName = () =>
+      validateField(fullName, fullNameError, 'Full Name is required');
+    const validatePhoneNumber = () =>
+      validateField(
+        phoneNumber,
+        phoneNumberError,
+        'Phone Number is required',
+        /^\d{10}$/,
+        'Invalid Phone Number format'
+      );
+    const validateLocation = () =>
+      validateField(location, locationError, 'Location is required');
+    const validateEmail = () =>
+      validateField(
+        email,
+        emailError,
+        'Email is required',
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'Invalid Email format'
+      );
+    const validateLinkedIn = () =>
+      validateField(
+        linkedin,
+        linkedinError,
+        'LinkedIn Profile URL is required',
+        /^https:\/\/[a-z]{2,3}\.linkedin\.com\/.*$/,
+        'Invalid LinkedIn Profile URL format'
+      );
 
     const validateFields = () => {
       validateFullName();
       validatePhoneNumber();
+      validateLocation();
       validateEmail();
       validateLinkedIn();
 
       return (
         !fullNameError.value &&
         !phoneNumberError.value &&
+        !locationError.value &&
         !emailError.value &&
         !linkedinError.value
       );
     };
 
-    const saveAndNext = () => {
-      if (validateFields()) {
-        nextSection();
-      }
-    };
+    useDataPersistence(resumeData, {
+      fullName,
+      phoneNumber,
+      location,
+      email,
+      linkedin,
+    });
 
     return {
-      resumeData,
-      sectionData,
-      nextSection,
-      previousSection,
-      currentSection,
-      sectionsLength,
-      saveAndNext,
+      fullName,
+      phoneNumber,
+      location,
+      email,
+      linkedin,
       fullNameError,
       phoneNumberError,
+      locationError,
       emailError,
       linkedinError,
       validateFullName,
       validatePhoneNumber,
+      validateLocation,
       validateEmail,
       validateLinkedIn,
+      validateFields,
     };
   },
 };
