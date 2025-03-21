@@ -1,65 +1,35 @@
 <template>
-  <div class="sections">
-    <div class="resume-title-container">
-      <h2 class="resume-title">Craft your winning attractive ATS friendly Resume!</h2>
-    </div>
-    <div class="sections-container">
-      <div class="section-header">
-        <h2 class="section-title">Objective</h2>
-        <div class="arrow-container">
-          <button
-            class="nav-arrow"
-            @click="previousSection"
-            :disabled="currentSection === 0"
-          >
-            &lt;
-          </button>
-          <div class="section-number-bubble">{{ sectionData.number }}</div>
-          <button
-            class="nav-arrow"
-            @click="nextSection"
-            :disabled="currentSection >= sectionsLength - 1"
-          >
-            &gt;
-          </button>
-        </div>
+  <BaseSection :validateFunction="validateObjective">
+    <div class="objective-box">
+      <div class="textarea-wrapper">
+        <textarea
+          v-model="objectiveText"
+          ref="objectiveTextArea"
+          class="objective-textarea"
+          placeholder="Highlight your career aspirations and how your skills align with the role."
+        >
+        </textarea>
       </div>
-      <div class="objective-box">
-        <div class="textarea-wrapper">
-          <textarea
-            v-model="objectiveText"
-            ref="objectiveTextArea"
-            class="objective-textarea"
-            @input="handleInput"
-            @keydown="handleKeyDown"
-            placeholder="Highlight your career aspirations and how your skills align with the role."
-          >
-          </textarea>
-        </div>
-      </div>
-      <button class="next-button" @click="saveAndNext">Next</button>
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
     </div>
-  </div>
+  </BaseSection>
 </template>
 
 <script>
 import { ref, inject, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useSectionValidation } from '../composables/useSectionValidation';
+import BaseSection from './BaseSection.vue';
 
 export default {
-  name: 'SectionsComponent',
-
+  name: 'ObjectiveComponent',
+  components: {
+    BaseSection,
+  },
   setup() {
     const objectiveText = ref('');
     const resumeData = inject('resumeData');
-    const sectionData = inject('sectionData');
-    const nextSection = inject('nextSection');
-    const previousSection = inject('previousSection');
-    const currentSection = inject('currentSection');
-    const sectionsLength = inject('sectionsLength');
-    const errorMessage = ref('');
-    const objectiveTextArea = ref(null);
     const updateTitle = inject('updateTitle');
+    const errorMessage = ref(''); // Local errorMessage
 
     onMounted(() => {
       updateTitle('Resume Builder | Home');
@@ -72,28 +42,19 @@ export default {
       resumeData.value.objective = objectiveText.value;
     });
 
-    const saveAndNext = () => {
+    const validateObjective = () => {
       if (!objectiveText.value.trim()) {
-        errorMessage.value = 'Please provide an objective before proceeding.';
-        return;
+        errorMessage.value = 'Please provide an objective before proceeding.'; // Update the composable's errorMessage
+        return false;
       }
-
-      errorMessage.value = '';
-      resumeData.value.objective = objectiveText.value;
-      console.log('Resume Data:', resumeData.value);
-      nextSection();
+      errorMessage.value = ''; // Clear the error message if validation passes
+      return true;
     };
 
     return {
       objectiveText,
-      saveAndNext,
-      sectionData,
-      nextSection,
-      previousSection,
-      currentSection,
-      sectionsLength,
-      errorMessage,
-      objectiveTextArea,
+      validateObjective,
+      errorMessage
     };
   },
 };
