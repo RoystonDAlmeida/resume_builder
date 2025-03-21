@@ -12,6 +12,8 @@ html, body, #app {
     border-bottom: 4px solid #e91e63;
     box-shadow: 0 4px 10px rgba(233, 30, 99, 0.5);
     height: 64px;
+    z-index: 10;
+    position: relative;
 }
 
 .v-toolbar-title.title {
@@ -28,47 +30,25 @@ html, body, #app {
 .sections {
     background-color: #1c1c1c; 
     color: white; 
-    padding: 20px; 
     overflow-y: auto;
     flex: 1;    /* Take up remaining available space */
     display: flex;
     flex-direction: column; /* Stack items vertically */
     justify-content: center;    /* Center horizontally */
-    align-items: flex-start;
+    align-items: center;
+    width: 100%;
+    margin-top: 64px;
 }
 
-.resume-title-container {
-    border: 2px solid white;
-    padding: 20px;
-    text-align: center;
-    width: fit-content; /* Adjust width to content */
-    height: auto;   /* Adjust height based on content */
-    margin-left: 20%; 
-    margin-right: 20%;
-    border-radius: 25px; 
-}
-  
-.resume-title {
-    font-family:'Times New Roman', Times, serif;
-    font-size: 1.5em; /* Adjust size as needed */
-    color: #e91e63; /* Pink-purplish color */
-    overflow: hidden; /* Ensures the text is in one line */
-    white-space: nowrap; /* Keep text on one line */
-    margin: 0 auto;
-    letter-spacing: .15em; /* Adjust letter spacing */
-    animation:
-      typing 3.5s steps(40, end),
-      blink-caret .75s step-end infinite;
-}
-  
+/* Common to all components */
 .sections-container {
     border: 2px solid #e91e63; 
     padding: 20px;
     text-align: center;
-    width: 60%;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
     height: auto;   
-    margin-left: 20%;
-    margin-right: 20%;
     margin-top: 20px;
     border-radius: 25px;
     position: relative;
@@ -79,7 +59,6 @@ html, body, #app {
     justify-content: space-between; 
     align-items: center;
     margin-bottom: 20px;
-    width: 100%;
 }
   
 .section-title {
@@ -109,22 +88,35 @@ html, body, #app {
   }
   
   
-.objective-box {
-    border: 1px dashed #ccc; 
-    padding: 20px;
-    margin: 0 10%; 
-    text-align: left;
-    border-radius: 10px;
+  .objective-box {
+    position: relative;
+    min-height: 100px;
+    width: 100%;
+    margin: 0 auto;
+    border: none;
     outline: none;
     box-sizing: border-box;
-}
+  }
   
-.objective-placeholder {
-    color: #aaa; /* Placeholder text color */
-    font-style: italic;
-    position: absolute; /* So it doesn't affect layout */
-    pointer-events: none; /* Allow clicks to pass through */
-}
+  .textarea-wrapper {
+    position: relative;
+  }
+  
+  .objective-textarea {
+    width: 100%;
+    min-height: 100px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: transparent;
+    color: white;
+    resize: vertical;
+    position: relative;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    z-index: 1;
+  }
 
 .next-button {
     background-color: #e91e63;
@@ -200,8 +192,8 @@ html, body, #app {
     color: lightgray; /* Adjust color as needed */
 }
 
-/* Styles for WorkExperienceComponent and EducationComponent*/
-.work-experience-container, .education-container, .technical-skills-container {
+/* Styles for WorkExperienceComponent, EducationComponent, TechnicalSkillsComponent, and LanguagesComponent */
+.work-experience-container, .education-container, .technical-skills-container, .languages-container {
     border: 2px solid #e91e63; 
     padding: 20px;
     text-align: center;
@@ -297,3 +289,35 @@ html, body, #app {
     font-size: 1.2em;
     cursor: pointer;
   }
+
+  /* Style for download icon in LanguagesComponent */
+  .download-icon {
+    margin-right: 8px; 
+  }
+
+  .generate-pdf-button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    align-self:center;   /* Align to the right */
+  }
+  
+  .download-icon {
+    margin-right: 8px;
+  }
+  
+  .pdf-preview-header {
+    display: flex;
+    align-items: right;
+    justify-content: flex-end;
+  }
+  
+  .pdf-buttons {
+    display: flex;
+    gap: 10px; /* Adjust the gap as needed */
+    justify-content: flex-end;
+  }  
