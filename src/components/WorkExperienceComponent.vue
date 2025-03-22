@@ -142,13 +142,13 @@ export default {
     const { validateField } = useFieldValidation();
 
     const validateJobTitle = (index) =>
-      validateField(workExperiences.value[index].jobTitle, jobTitleError.value, 'Job Title is required', null, null, index);
+      validateField(workExperiences.value[index].jobTitle, jobTitleError, 'Job Title is required', null, null, index);
     const validateCompanyName = (index) =>
-      validateField(workExperiences.value[index].companyName, companyNameError.value, 'Company Name is required', null, null, index);
+      validateField(workExperiences.value[index].companyName, companyNameError, 'Company Name is required', null, null, index);
     const validateLocation = (index) =>
-      validateField(workExperiences.value[index].location, locationError.value, 'Location is required', null, null, index);
+      validateField(workExperiences.value[index].location, locationError, 'Location is required', null, null, index);
     const validateFromDate = (index) =>
-      validateField(workExperiences.value[index].fromDate, fromDateError.value, 'From Date is required', null, null, index);
+      validateField(workExperiences.value[index].fromDate, fromDateError, 'From Date is required', null, null, index);
     const validateResponsibilities = (index) => {
       const maxLength = 500;
       if (workExperiences.value[index].responsibilities.length > maxLength) {
