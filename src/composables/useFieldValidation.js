@@ -1,12 +1,24 @@
-import { ref } from 'vue';
-
 export function useFieldValidation() {
-  const validateField = (value, errorArray, errorMessage, minLength, maxLength, index) => {
+  const validateField = (value, errorRef, errorMessage, minLength, maxLength, index) => {
     if (!value) {
-      errorArray[index] = errorMessage;
+      // Handling null values
+
+      if (typeof index === 'number' && Array.isArray(errorRef.value)) {
+        errorRef.value[index] = errorMessage;
+      } else {
+        errorRef.value = errorMessage;
+      }
       return false;
-    } else {
-      errorArray[index] = '';
+    } 
+    
+    else {
+      // Handling non-null values
+      
+      if (typeof index === 'number' && Array.isArray(errorRef.value)) {
+        errorRef.value[index] = '';
+      } else {
+        errorRef.value = '';
+      }
       return true;
     }
   };
