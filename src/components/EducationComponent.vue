@@ -121,32 +121,45 @@ export default {
     const updateTitle = inject('updateTitle');
 
     // Define education data
-    const educationSection = ref(resumeData.value.education || [
-      {
-        name: '',
-        insituteName: '',
-        universityName: '',
-        YearOfPassing: '',
-        percentage: '',
-      },
-    ]);
+    const educationSection = ref([]);
 
     // Error messages for validation
-    const educationNameError = ref(educationSection.value.map(() => ''));
-    const insituteNameError = ref(educationSection.value.map(() => ''));
-    const universityNameError = ref(educationSection.value.map(() => ''));
-    const YearOfPassingError = ref(educationSection.value.map(() => ''));
-    const percentageError = ref(educationSection.value.map(() => ''));
+    const educationNameError = ref([]);
+    const insituteNameError = ref([]);
+    const universityNameError = ref([]);
+    const YearOfPassingError = ref([]);
+    const percentageError = ref([]);
 
     const { validateField } = useFieldValidation();
 
     onMounted(() => {
       updateTitle('Resume Builder | Education');
+
+       educationSection.value = [{
+              name: '',
+              insituteName: '',
+              universityName: '',
+              YearOfPassing: '',
+              percentage: '',
+            }];
+            
       // Load education data from localStorage
       const storedResumeData =
         JSON.parse(localStorage.getItem('resumeData')) || {};
+
+         educationNameError.value = educationSection.value.map(() => '');
+          insituteNameError.value = educationSection.value.map(() => '');
+          universityNameError.value = educationSection.value.map(() => '');
+          YearOfPassingError.value = educationSection.value.map(() => '');
+          percentageError.value = educationSection.value.map(() => '');
+
       if (storedResumeData.educationSection) {
-        educationSection.value = storedResumeData.education;
+        educationSection.value = storedResumeData.educationSection;
+         educationNameError.value = educationSection.value.map(() => '');
+          insituteNameError.value = educationSection.value.map(() => '');
+          universityNameError.value = educationSection.value.map(() => '');
+          YearOfPassingError.value = educationSection.value.map(() => '');
+          percentageError.value = educationSection.value.map(() => '');
       }
     });
 
@@ -181,7 +194,7 @@ export default {
     const validateEducationName = (index) =>
       validateField(
         educationSection.value[index].name,
-        educationNameError.value,
+        educationNameError,
         'Degree/PUC/SSLC, Location is required',
         null,
         null,
@@ -191,7 +204,7 @@ export default {
     const validateInstituteName = (index) =>
       validateField(
         educationSection.value[index].insituteName,
-        insituteNameError.value,
+        insituteNameError,
         'Institute / School is required',
         null,
         null,
@@ -201,7 +214,7 @@ export default {
     const validateUniversityName = (index) =>
       validateField(
         educationSection.value[index].universityName,
-        universityNameError.value,
+        universityNameError,
         'University / Board is required',
         null,
         null,
@@ -211,7 +224,7 @@ export default {
     const validateYearOfPassing = (index) =>
       validateField(
         educationSection.value[index].YearOfPassing,
-        YearOfPassingError.value,
+        YearOfPassingError,
         'Year of Passing is required',
         null,
         null,
@@ -246,11 +259,11 @@ export default {
       let isValid = true;
 
       // Reset error messages
-      educationNameError.value = educationSection.value.map(() => '');
-      insituteNameError.value = educationSection.value.map(() => '');
-      universityNameError.value = educationSection.value.map(() => '');
-      YearOfPassingError.value = educationSection.value.map(() => '');
-      percentageError.value = educationSection.value.map(() => '');
+       educationNameError.value = educationSection.value.map(() => '');
+        insituteNameError.value = educationSection.value.map(() => '');
+        universityNameError.value = educationSection.value.map(() => '');
+        YearOfPassingError.value = educationSection.value.map(() => '');
+        percentageError.value = educationSection.value.map(() => '');
 
       educationSection.value.forEach((education, index) => {
         if (!validateEducationName(index)) isValid = false;
