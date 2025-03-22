@@ -77,6 +77,7 @@
 
 <script>
 import { ref, inject, onMounted, nextTick } from 'vue';
+import { useDataPersistence } from '../composables/useDataPersistence';
 
 export default {
   name: 'TechnicalSkillsComponent',
@@ -90,12 +91,8 @@ export default {
     const updateTitle = inject('updateTitle');
 
     // Define technical skills data
-    const technicalSkillsSection = ref(resumeData.value.technicalSkills || [
-      {
-        category: '',
-        subcategory: '',
-      },
-    ]);
+    const technicalSkillsSection = ref([]);
+
     const technicalSkillsError = ref(false);
 
     // Error messages for validation
@@ -107,21 +104,33 @@ export default {
 
     onMounted(() => {
       updateTitle('Resume Builder | Technical Skills');
+
       // Load technical skills data from localStorage
       const storedResumeData =
         JSON.parse(localStorage.getItem('resumeData')) || {};
+
       if (storedResumeData.technicalSkills) {
+        resumeData.value.technicalSkills = storedResumeData.technicalSkills;
         technicalSkillsSection.value = storedResumeData.technicalSkills;
+      } else {
+        // If no data in localStorage, initialize with a default category
+        technicalSkillsSection.value = [
+          {
+            category: '',
+            subcategory: '',
+          },
+        ];
       }
-      nextTick(() => {
-        // Initialize error arrays for the loaded experiences
-        categoryError.value = technicalSkillsSection.value.map(() => '');
-        subcategoryError.value = technicalSkillsSection.value.map(() => '');
-      });
+
+      // After setting technicalSkillsSection.value, update error arrays
+      // Initialize the error arrays
+      categoryError.value = technicalSkillsSection.value.map(() => '');
+      subcategoryError.value = technicalSkillsSection.value.map(() => '');
     });
 
+
     const addTechnicalSkills = () => {
-      if (technicalSkillsSection.value.length < 5) {
+      if (technicalSkillsSection.value && technicalSkillsSection.value.length < 5) {
         technicalSkillsSection.value.push({
           category: '',
           subcategory: '',
@@ -132,6 +141,7 @@ export default {
         subcategoryError.value.push('');
       }
     };
+
 
     const removeCategory = (index) => {
       if (technicalSkillsSection.value.length > 1) {
@@ -185,15 +195,13 @@ export default {
     const saveAndNext = () => {
       if (validateFields()) {
         // Save technical skills data to resumeData in local storage
-        let resumeData = JSON.parse(localStorage.getItem('resumeData')) || {};
-
-        resumeData.technicalSkills = technicalSkillsSection.value;
-
-        localStorage.setItem('resumeData', JSON.stringify(resumeData));
+        resumeData.value.technicalSkills = technicalSkillsSection.value;
 
         nextSection();
       }
     };
+
+    useDataPersistence(resumeData, { technicalSkills: technicalSkillsSection });
 
     return {
       resumeData,
@@ -216,9 +224,10 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.error-message {
-  color: red;
-  margin-bottom: 10px;
-}
+  .error-message {
+    color: red;
+    margin-bottom: 10px;
+  }
 </style>
