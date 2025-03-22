@@ -177,7 +177,7 @@ const formatResumeToPdf = (resumeData) => {
       doc.text(`• ${skill.category}: `, leftMargin, currentY);
       doc.setFont('times', 'normal');
       currentY = addWrappedText(doc, skill.subcategory, leftMargin + categoryWidth, currentY, 170, lineHeight, leftMargin);
-      currentY += lineHeight;
+      currentY += (lineHeight / 2);
     });
   }
   currentY += 5;
