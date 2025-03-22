@@ -80,49 +80,49 @@ export default {
     const { validateField } = useFieldValidation();
 
     const validateFullName = () =>
-      validateField(fullName, fullNameError, 'Full Name is required');
+      validateField(fullName.value, fullNameError, 'Full Name is required');
+
     const validatePhoneNumber = () =>
       validateField(
-        phoneNumber,
+        phoneNumber.value,
         phoneNumberError,
         'Phone Number is required',
         /^\d{10}$/,
         'Invalid Phone Number format'
       );
+
     const validateLocation = () =>
-      validateField(location, locationError, 'Location is required');
+      validateField(location.value, locationError, 'Location is required');
+
     const validateEmail = () =>
       validateField(
-        email,
+        email.value,
         emailError,
         'Email is required',
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         'Invalid Email format'
       );
+
     const validateLinkedIn = () =>
       validateField(
-        linkedin,
+        linkedin.value,
         linkedinError,
         'LinkedIn Profile URL is required',
         /^https:\/\/[a-z]{2,3}\.linkedin\.com\/.*$/,
         'Invalid LinkedIn Profile URL format'
       );
 
-    const validateFields = () => {
-      validateFullName();
-      validatePhoneNumber();
-      validateLocation();
-      validateEmail();
-      validateLinkedIn();
+      const validateFields = () => {
+        let isValid = true;
+        
+        if (!validateFullName()) isValid = false;
+        if (!validatePhoneNumber()) isValid = false;
+        if (!validateLocation()) isValid = false;
+        if (!validateEmail()) isValid = false;
+        if (!validateLinkedIn()) isValid = false;
 
-      return (
-        !fullNameError.value &&
-        !phoneNumberError.value &&
-        !locationError.value &&
-        !emailError.value &&
-        !linkedinError.value
-      );
-    };
+        return isValid;
+      };
 
     useDataPersistence(resumeData, {
       fullName,
