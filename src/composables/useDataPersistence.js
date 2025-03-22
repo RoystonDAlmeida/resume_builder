@@ -1,33 +1,52 @@
-import { watch, nextTick } from 'vue';
+import { watch } from 'vue';
 
 export function useDataPersistence(resumeData, fields) {
-  for (const fieldName in fields) {
-    if (fieldName === 'workExperiences') {
-      // Handle workExperiences array
-      const storedValue = localStorage.getItem(fieldName);
-      if (storedValue) {
-        resumeData.value[fieldName] = JSON.parse(storedValue);
-      }
-      watch(fields[fieldName], (newVal) => {
-        resumeData.value[fieldName] = newVal;
-        localStorage.setItem(fieldName, JSON.stringify(newVal));
-      }, { deep: true }); // Deep watch for array changes
-    } else {
-      // Handle individual fields
-      const storedValue = localStorage.getItem(fieldName);
-      if (storedValue) {
-        resumeData.value[fieldName] = JSON.parse(storedValue);
-        nextTick(() => {
-          fields[fieldName].value = JSON.parse(storedValue);
-        });
-      } else {
-        resumeData.value[fieldName] = fields[fieldName].value || '';
-      }
+    for (const fieldName in fields) {
+        const localStorageKey = fieldName;
 
-      watch(fields[fieldName], (newVal) => {
-        resumeData.value[fieldName] = newVal;
-        localStorage.setItem(fieldName, JSON.stringify(newVal));
-      });
+        if (fieldName === 'workExperiences' || fieldName === 'educationSection') {
+            // Handle arrays
+            const storedValue = localStorage.getItem(localStorageKey);
+            if (storedValue && storedValue !== "undefined") { // IMPORTANT: Check for "undefined"
+                try {
+                    resumeData.value[fieldName] = JSON.parse(storedValue);
+                    fields[fieldName].value = JSON.parse(storedValue)
+                } catch (error) {
+                    console.error(`Error parsing JSON for ${fieldName}:`, error);
+                    resumeData.value[fieldName] = [];
+                    fields[fieldName].value = []
+                }
+            } else {
+                // Handle the case where storedValue is null or "undefined"
+                resumeData.value[fieldName] = [];
+                fields[fieldName].value = [];
+            }
+
+            watch(fields[fieldName], (newVal) => {
+                localStorage.setItem(localStorageKey, JSON.stringify(newVal));
+            }, { deep: true });
+        } else {
+            // Handle individual fields
+            const storedValue = localStorage.getItem(localStorageKey);
+            if (storedValue && storedValue !== "undefined") {  // IMPORTANT: Check for "undefined"
+                try {
+                    const parsedValue = JSON.parse(storedValue);
+                     resumeData.value[fieldName] = parsedValue;
+                     fields[fieldName].value = parsedValue;
+
+                } catch (error) {
+                    console.error(`Error parsing JSON for ${fieldName}:`, error);
+                     resumeData.value[fieldName] = '';
+                     fields[fieldName].value = '';
+                }
+            } else {
+                 resumeData.value[fieldName] = '';
+                 fields[fieldName].value = '';
+            }
+
+            watch(fields[fieldName], (newVal) => {
+                localStorage.setItem(localStorageKey, JSON.stringify(newVal));
+            });
+        }
     }
-  }
 }
