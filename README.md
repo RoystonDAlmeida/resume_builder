@@ -2,6 +2,12 @@
 
 This is a web-based resume builder application that empowers users to create professional and customized resumes effortlessly. The application guides users through a structured process, covering essential resume sections and offering features like input validation, data persistence, and PDF generation.
 
+## Demo
+
+Here's a quick demo of the Resume Builder app:
+
+<img src="./src/assets/resume_builder_output.gif" alt="Resume Builder GIF" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+
 ## Key Features
 
 *   **Structured Resume Sections:** The application breaks down the resume creation process into logical, easy-to-follow sections:
